@@ -21,7 +21,7 @@ const FadeInView = (props) => {
     Animated.timing(heightAnim, {
       toValue: 60,
       duration: 500,
-      useNativeDriver: true
+      useNativeDriver: false
     }).start();
   }, [heightAnim]);
 
