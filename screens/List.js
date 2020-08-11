@@ -19,39 +19,10 @@ import * as theme from "../theme";
 import { AudioPlayer } from "../components/AudioPlayer.component";
 import { SearchBar } from "../components/SearchBar.component";
 
+import mocks from './mocks';
+
 const { width, height } = Dimensions.get("window");
-const mocks = [
-  {
-    id: 1,
-    location: "Paris, France",
-    title: "Paris Paradise",
-    description: "Energizing ambience from the City of Light.",
-    preview:
-      "https://scontent-cdg2-1.xx.fbcdn.net/v/t1.0-9/18698360_1158297100947660_3228357811651368452_n.jpg?_nc_cat=104&_nc_sid=8bfeb9&_nc_ohc=kLMn_ORaJEcAX-BgKbg&_nc_ht=scontent-cdg2-1.xx&oh=63c2747342b33bf94c274443c91eabef&oe=5F40F8EF",
-    url: "https://coffitivity.com/assets/sounds/full/mp3/paris-paradise.mp3",
-    searchableTerms: "paris france",
-  },
-  {
-    id: 2,
-    location: "Rio de Janeiro, Brazil",
-    title: "Brazil Bistro",
-    description: "The musical chatter of a brazilian coffeehouse.",
-    preview:
-      "https://img.theculturetrip.com/1440x960/smart/wp-content/uploads/2018/03/webp-net-resizeimage-23-1.jpg",
-    url: "https://coffitivity.com/assets/sounds/full/mp3/brazil-bistro.mp3",
-    searchableTerms: "rio de janeiro brazil coffee coffeehouse house",
-  },
-  {
-    id: 3,
-    location: "Waco, Texas",
-    title: "Texas Teahouse",
-    description: "Hefty sounds from a big state.",
-    preview:
-      "https://media-cdn.tripadvisor.com/media/photo-s/12/ca/7f/d0/jake-s-texas-tea-house.jpg",
-    url: "https://coffitivity.com/assets/sounds/full/mp3/texas-teahouse.mp3",
-    searchableTerms: "waco texas usa tea teahouse house",
-  },
-];
+
 const styles = StyleSheet.create({
   flex: {
     flex: 0,
@@ -234,10 +205,12 @@ const List = ({ destinations, navigation }) => {
   };
 
   const renderRecommendations = () => {
+    const latestDestinations = destinations.reverse().split(0,3);
+
     return (
       <React.Fragment>
         <View style={[styles.flex, styles.row, styles.header, {paddingTop: 0, paddingBottom: theme.sizes.padding * 0.67 }]}>
-          <Text style={{ fontSize: theme.sizes.font * 2 }}>Recommended </Text>
+          <Text style={{ fontSize: theme.sizes.font * 2 }}>Latest</Text>
         </View>
         <View style={[styles.column, styles.destinations]}>
           <FlatList
@@ -249,7 +222,7 @@ const List = ({ destinations, navigation }) => {
             scrollEventThrottle={16}
             snapToAlignment="center"
             style={{ overflow: "visible", height: 280 }}
-            data={destinations}
+            data={latestDestinations}
             keyExtractor={(item, index) => `${item.id}`}
             onScroll={Animated.event([
               { nativeEvent: { contentOffset: { x: scrollX } } },

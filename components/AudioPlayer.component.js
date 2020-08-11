@@ -88,6 +88,7 @@ const AudioPlayer = ({ item, ...rest }) => {
         stopAudio();
       }
       await soundObject.loadAsync({ uri: url }, { preload: "none" });
+      playbackObject.setIsLoopingAsync(true);
       await soundObject.playAsync();
     } catch (err) {
       console.log("error playSound", err);
