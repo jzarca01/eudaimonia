@@ -37,7 +37,7 @@ export default [
     preview:
       "https://www.indonesia-heritage.net/wp-content/uploads/2014/08/lubuk-linggaau.jpg",
     url: "https://eudaimonia-bucket.s3.eu-west-3.amazonaws.com/sumatra-riviere_oiseaux.mp4",
-    searchableTerms: "indonesia sumatra watervang dam birds river nature",
+    searchableTerms: "indonesia sumatra watervang dam birds river nature countryside",
   },
   {
     id: 5,
@@ -46,6 +46,15 @@ export default [
     description: "Wake up to the call to prayer at dawn in the busy city of Jakarta.",
     preview: "https://www.indonesia.travel/content/dam/indtravelrevamp/en/destinations/java/dki-jakarta/jakarta/the-grand-istiqlal-mosque/f314f93b522a777bdffae9c34acaa1c08f95a5a2-2b27c.jpg",
     url: "https://eudaimonia-bucket.s3.eu-west-3.amazonaws.com/jakarta-premier_appel_priere.mp4",
-    searchableTerms: "indonesia jakarta dawn mosque islam",
+    searchableTerms: "indonesia jakarta dawn mosque islam prayer city",
+  },
+  {
+    id: 6,
+    location: "Saint-Raphaël, France",
+    title: "Le chant des cigales",
+    description: "Cicadas are truly the most iconic sound of France's Provence.",
+    preview: "https://proprietes.lefigaro.fr/indicateur/images/PDF/CMS/articles/15804949-1592216754.26.jpg",
+    url: "https://eudaimonia-bucket.s3.eu-west-3.amazonaws.com/provence-cigales.mp4",
+    searchableTerms: "france provence cigales cicadas saint raphael",
   }
 ];

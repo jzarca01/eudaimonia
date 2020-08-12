@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, createRef } from "react";
 import {
   Animated,
   Text,
@@ -17,11 +17,156 @@ import Octicons from "react-native-vector-icons/Octicons";
 
 import * as theme from "../theme";
 import { AudioPlayer } from "../components/AudioPlayer.component";
-import { SearchBar } from "../components/SearchBar.component";
+import DelayInput from "react-native-debounce-input";
 
-import mocks from './mocks';
+import mocks from "./mocks";
 
-const { width, height } = Dimensions.get("window");
+const { width } = Dimensions.get("window");
+
+const List = ({ navigation }) => {
+  const scrollX = new Animated.Value(0);
+  const inputRef = createRef();
+
+  const [query, setQuery] = useState("");
+  const [filteredDestinations, setFilteredDestinations] = useState(mocks);
+
+  const [selectedItem, setSelectedItem] = useState(null);
+
+  useEffect(() => {
+    const lowerCaseQuery = query.toLowerCase();
+    const newDestinations = mocks.filter((item) =>
+      item.searchableTerms.includes(lowerCaseQuery)
+    );
+
+    setFilteredDestinations(newDestinations);
+  }, [query]);
+
+  const HeaderComponent = () => (
+    <View style={[styles.flex, styles.row, styles.header]}>
+      <DelayInput
+        value={query}
+        placeholder={"Search..."}
+        minLength={1}
+        inputRef={inputRef}
+        onChangeText={setQuery}
+        delayTimeout={500}
+        style={{ fontSize: theme.sizes.font }}
+      />
+    </View>
+  );
+
+  toggleSound = (item) => {
+    if (selectedItem === item) {
+      setSelectedItem(null);
+    } else {
+      setSelectedItem(item);
+    }
+  };
+
+  renderDestinations = () => {
+    return (
+      <View style={[styles.flex, styles.column, styles.recommended]}>
+        <View style={[styles.row, styles.recommendedHeader]}>
+          <Text style={{ fontSize: theme.sizes.font * 1.4 }}>
+            Our ambient sounds{" "}
+          </Text>
+        </View>
+        <View style={[styles.column, styles.recommendedList]}>
+          <FlatList
+            numColumns={2}
+            columnWrapperStyle={{
+              marginTop: 10,
+              marginHorizontal: theme.sizes.margin * 0.5,
+            }}
+            pagingEnabled
+            scrollEnabled
+            showsHorizontalScrollIndicator={false}
+            scrollEventThrottle={16}
+            snapToAlignment="center"
+            style={[styles.shadow, { overflow: "visible" }]}
+            data={filteredDestinations}
+            keyExtractor={(item, index) => `${item.id}`}
+            renderItem={({ item, index }) =>
+              this.renderDestination(item, index)
+            }
+          />
+        </View>
+      </View>
+    );
+  };
+
+  renderDestination = (item, index) => {
+    const isLastItem = index === filteredDestinations.length - 1;
+    return (
+      <TouchableOpacity
+        style={[
+          styles.flex,
+          styles.column,
+          styles.recommendation,
+          styles.shadow,
+          isLastItem ? { marginRight: theme.sizes.margin / 2 } : null,
+        ]}
+        onPress={() => this.toggleSound(item)}
+      >
+        <View style={[styles.flex, styles.recommendationHeader]}>
+          <Image
+            style={[
+              styles.recommendationImage,
+              selectedItem === item ? { opacity: 0.2 } : { opacity: 1 },
+            ]}
+            source={{ uri: item.preview }}
+          />
+        </View>
+        <View
+          style={[
+            styles.flex,
+            styles.column,
+            styles.shadow,
+            {
+              justifyContent: "space-evenly",
+              padding: theme.sizes.padding / 2,
+            },
+          ]}
+        >
+          <Text
+            style={{
+              fontSize: theme.sizes.font * 1.25,
+              fontWeight: "500",
+              paddingBottom: theme.sizes.padding / 4.5,
+            }}
+          >
+            {item.title}
+          </Text>
+          <Text style={{ color: theme.colors.caption }}>
+            {item.description}
+          </Text>
+          <View
+            style={[
+              styles.row,
+              {
+                alignItems: "center",
+                justifyContent: "space-between",
+                marginTop: theme.sizes.margin,
+              },
+            ]}
+          ></View>
+        </View>
+      </TouchableOpacity>
+    );
+  };
+  return (
+    <React.Fragment>
+      <HeaderComponent />
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: theme.sizes.padding }}
+      >
+        {this.renderDestinations()}
+      </ScrollView>
+      <AudioPlayer item={selectedItem} />
+    </React.Fragment>
+  );
+};
 
 const styles = StyleSheet.create({
   flex: {
@@ -134,267 +279,5 @@ const styles = StyleSheet.create({
     borderColor: theme.colors.active,
   },
 });
-
-const List = ({ destinations, navigation }) => {
-  const scrollX = new Animated.Value(0);
-
-  const [query, setQuery] = useState("");
-  const [filteredDestinations, setFilteredDestinations] = useState(
-    destinations
-  );
-
-  const [selectedItem, setSelectedItem] = useState(null);
-
-  useEffect(() => {
-    const lowerCaseQuery = query.toLowerCase();
-    const newDestinations = destinations.filter((item) =>
-      item.searchableTerms.includes(lowerCaseQuery)
-    );
-
-    setFilteredDestinations(newDestinations);
-  }, [query]);
-
-  const HeaderComponent = () => (
-    <View style={[styles.flex, styles.row, styles.header]}>
-        <SearchBar
-          style={{ fontSize: theme.sizes.font }}
-          placeholder={"Search..."}
-          onChangeText={(text) => setQuery(text)}
-          value={query}
-        />
-    </View>
-  );
-
-  const toggleSound = (item) => {
-    if (selectedItem === item) {
-      setSelectedItem(null);
-    } else {
-      setSelectedItem(item);
-    }
-  };
-
-  const renderDots = () => {
-    const dotPosition = Animated.divide(scrollX, width);
-    return (
-      <View
-        style={[
-          styles.flex,
-          styles.row,
-          { justifyContent: "center", alignItems: "center", marginTop: 10 },
-        ]}
-      >
-        {destinations.map((item, index) => {
-          const borderWidth = dotPosition.interpolate({
-            inputRange: [index - 1, index, index + 1],
-            outputRange: [0, 2.5, 0],
-            extrapolate: "clamp",
-          });
-          return (
-            <Animated.View
-              key={`step-${item.id}`}
-              style={[
-                styles.dots,
-                styles.activeDot,
-                { borderWidth: borderWidth },
-              ]}
-            />
-          );
-        })}
-      </View>
-    );
-  };
-
-  const renderRecommendations = () => {
-    const latestDestinations = destinations.reverse().split(0,3);
-
-    return (
-      <React.Fragment>
-        <View style={[styles.flex, styles.row, styles.header, {paddingTop: 0, paddingBottom: theme.sizes.padding * 0.67 }]}>
-          <Text style={{ fontSize: theme.sizes.font * 2 }}>Latest</Text>
-        </View>
-        <View style={[styles.column, styles.destinations]}>
-          <FlatList
-            horizontal
-            pagingEnabled
-            scrollEnabled
-            showsHorizontalScrollIndicator={false}
-            decelerationRate={0}
-            scrollEventThrottle={16}
-            snapToAlignment="center"
-            style={{ overflow: "visible", height: 280 }}
-            data={latestDestinations}
-            keyExtractor={(item, index) => `${item.id}`}
-            onScroll={Animated.event([
-              { nativeEvent: { contentOffset: { x: scrollX } } },
-            ], {useNativeDriver: false})}
-            renderItem={({ item }) => renderRecommendation(item)}
-          />
-          {renderDots()}
-        </View>
-      </React.Fragment>
-    );
-  };
-
-  const renderRecommendation = (item) => {
-    return (
-      <TouchableOpacity activeOpacity={0.8} onPress={() => toggleSound(item)}>
-        <ImageBackground
-          style={[styles.flex, styles.destination, styles.shadow]}
-          imageStyle={[
-            { borderRadius: theme.sizes.radius },
-            selectedItem === item ? { opacity: 0.2 } : { opacity: 1 },
-          ]}
-          source={{ uri: item.preview }}
-        >
-          <View style={[styles.row, { justifyContent: "space-between" }]}>
-            <View style={[styles.column, { flex: 1 }]}>
-              <Text style={{ color: theme.colors.white }}>
-                <Octicons
-                  name="location"
-                  size={theme.sizes.font * 0.8}
-                  color={theme.colors.white}
-                />
-                <Text> {item.location}</Text>
-              </Text>
-            </View>
-          </View>
-        </ImageBackground>
-        <View style={[styles.column, styles.destinationInfo, styles.shadow]}>
-          <Text
-            style={{
-              fontSize: theme.sizes.font * 1.25,
-              fontWeight: "500",
-              paddingBottom: 8,
-            }}
-          >
-            {item.title}
-          </Text>
-          <View
-            style={[
-              styles.row,
-              { justifyContent: "space-between", alignItems: "flex-end" },
-            ]}
-          >
-            <Text style={{ color: theme.colors.caption }}>
-              {item.description.split("").slice(0, 50)}...
-            </Text>
-            <FontAwesome
-              name="chevron-right"
-              size={theme.sizes.font * 0.75}
-              color={theme.colors.caption}
-            />
-          </View>
-        </View>
-      </TouchableOpacity>
-    );
-  };
-
-  const renderDestinations = () => {
-    return (
-      <View style={[styles.flex, styles.column, styles.recommended]}>
-        <View style={[styles.row, styles.recommendedHeader]}>
-          <Text style={{ fontSize: theme.sizes.font * 1.4 }}>
-            Our ambient sounds{" "}
-          </Text>
-        </View>
-        <View style={[styles.column, styles.recommendedList]}>
-          <FlatList
-            numColumns={2}
-            columnWrapperStyle={{
-              marginTop: 10,
-              marginHorizontal: theme.sizes.margin * 0.5,
-            }}
-            pagingEnabled
-            scrollEnabled
-            showsHorizontalScrollIndicator={false}
-            scrollEventThrottle={16}
-            snapToAlignment="center"
-            style={[styles.shadow, { overflow: "visible" }]}
-            data={filteredDestinations}
-            keyExtractor={(item, index) => `${item.id}`}
-            renderItem={({ item, index }) => renderDestination(item, index)}
-          />
-        </View>
-      </View>
-    );
-  };
-
-  const renderDestination = (item, index) => {
-    const isLastItem = index === destinations.length - 1;
-    return (
-      <TouchableOpacity
-        style={[
-          styles.flex,
-          styles.column,
-          styles.recommendation,
-          styles.shadow,
-          isLastItem ? { marginRight: theme.sizes.margin / 2 } : null,
-        ]}
-        onPress={() => toggleSound(item)}
-      >
-        <View style={[styles.flex, styles.recommendationHeader]}>
-          <Image
-            style={[
-              styles.recommendationImage,
-              selectedItem === item ? { opacity: 0.2 } : { opacity: 1 },
-            ]}
-            source={{ uri: item.preview }}
-          />
-        </View>
-        <View
-          style={[
-            styles.flex,
-            styles.column,
-            styles.shadow,
-            {
-              justifyContent: "space-evenly",
-              padding: theme.sizes.padding / 2,
-            },
-          ]}
-        >
-          <Text
-            style={{
-              fontSize: theme.sizes.font * 1.25,
-              fontWeight: "500",
-              paddingBottom: theme.sizes.padding / 4.5,
-            }}
-          >
-            {item.title}
-          </Text>
-          <Text style={{ color: theme.colors.caption }}>
-            {item.description}
-          </Text>
-          <View
-            style={[
-              styles.row,
-              {
-                alignItems: "center",
-                justifyContent: "space-between",
-                marginTop: theme.sizes.margin,
-              },
-            ]}
-          ></View>
-        </View>
-      </TouchableOpacity>
-    );
-  };
-  return (
-    <React.Fragment>
-      <HeaderComponent />
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: theme.sizes.padding }}
-      >
-        {query === "" && renderRecommendations()}
-        {renderDestinations()}
-      </ScrollView>
-      <AudioPlayer item={selectedItem} />
-    </React.Fragment>
-  );
-};
-
-List.defaultProps = {
-  destinations: mocks,
-};
 
 export default List;
