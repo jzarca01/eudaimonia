@@ -23,14 +23,13 @@ const GESTURE_CONFIG = {
 
 export default (props) => {
   const { user } = props;
-  const { stories = [] } = user || {};
+  const { stories = [], readMoreUrl } = user || {};
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isWebviewOpen, setWebviewOpen] = useState(false);
   const [isPause, setIsPause] = useState(false);
   const [isLoaded, setLoaded] = useState(false);
-  const [duration, setDuration] = useState(15);
   const story = stories.length ? stories[currentIndex] : {};
-  const { isReadMore, url } = story || {};
+  const [duration, setDuration] = useState(story && story.duration ? story.duration : 15);
 
   const changeStory = (evt) => {
     if (evt.locationX > SCREEN_WIDTH / 2) {
@@ -44,7 +43,7 @@ export default (props) => {
     if (stories.length - 1 > currentIndex) {
       setCurrentIndex(currentIndex + 1);
       setLoaded(false);
-      setDuration(15);
+      setDuration(duration);
     } else {
       setCurrentIndex(0);
       props.onStoryNext();
@@ -55,7 +54,7 @@ export default (props) => {
     if (currentIndex > 0 && stories.length) {
       setCurrentIndex(currentIndex - 1);
       setLoaded(false);
-      setDuration(15);
+      setDuration(duration);
     } else {
       setCurrentIndex(0);
       props.onStoryPrevious();
@@ -67,8 +66,9 @@ export default (props) => {
   };
 
   const onVideoLoaded = (length) => {
+    const duration = length.durationMillis / 1000;
     setLoaded(true);
-    setDuration(length.duration);
+    setDuration(duration);
   };
 
   const onPause = (result) => {
@@ -141,8 +141,6 @@ export default (props) => {
             onClosePress={props.onClose}
           />
 
-          {isReadMore && <Readmore onReadMore={onReadMoreOpen} />}
-
           <ProgressArray
             next={nextStory}
             isLoaded={isLoaded}
@@ -157,17 +155,22 @@ export default (props) => {
           />
         </View>
 
-        <Modal
-          style={styles.modal}
-          position="bottom"
-          visible={isWebviewOpen}
-          onRequestClose={onReadMoreClose}
-          animationType="slide"
-          transparent={false}
-        >
-          <View style={styles.bar} />
-          <WebView source={{ uri: "https://www.google.com" }} />
-        </Modal>
+        {readMoreUrl && (
+          <React.Fragment>
+            <Readmore onReadMore={onReadMoreOpen} />
+            <Modal
+              style={styles.modal}
+              position="bottom"
+              visible={isWebviewOpen}
+              onRequestClose={onReadMoreClose}
+              animationType="slide"
+              transparent={false}
+            >
+              <View style={styles.bar} />
+              <WebView source={{ uri: readMoreUrl }} />
+            </Modal>
+          </React.Fragment>
+        )}
       </TouchableOpacity>
     </GestureRecognizer>
   );

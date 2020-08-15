@@ -22,6 +22,7 @@ export default (props) => {
             shouldPlay
             onLoad={item => props.onVideoLoaded(item)}
             style={styles.content}
+            resizeMode="cover"
           />
         )}
     </View>

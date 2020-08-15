@@ -22,7 +22,7 @@ export default (props) => {
               toValue: width,
               duration: getDuration(),
               easing: Easing.linear,
-              useNativeDriver: false
+              useNativeDriver: false,
             }).start(({ finished }) => {
               if (finished) props.next();
             })
@@ -53,7 +53,6 @@ export default (props) => {
     if (index === currentIndex) {
       if (props.pause) {
         const endtime = Date.now();
-        console.log("endtime", endtime);
         setPauseTime(endtime);
       }
 

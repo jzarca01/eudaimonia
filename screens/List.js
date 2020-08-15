@@ -139,15 +139,23 @@ const stories = [
 const List = ({ navigation }) => {
   const [query, setQuery] = useState("");
   const [filteredDestinations, setFilteredDestinations] = useState(mocks);
+  const [stories, setStories ] = useState(null);
   const [isLoaded, setLoaded] = useState(false);
 
   const [selectedItem, setSelectedItem] = useState(null);
 
   useEffect(() => {
-    setTimeout(() => {
+    getStories().then(res => res.json()).then(st => {
+      const structuredStories = st.map(s => ({...s, stories: JSON.parse(s.stories)}))
+
+      setStories(structuredStories);
       setLoaded(true);
-    }, 2000);
-  });
+    })
+  }, []);
+
+  const getStories = () => {
+    return fetch('https://sheetdb.io/api/v1/xajdeqvm1a654');
+  } 
 
   useEffect(() => {
     const lowerCaseQuery = query.toLowerCase();
