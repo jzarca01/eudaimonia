@@ -1,36 +1,153 @@
-import React, { useState, useEffect, createRef } from "react";
-import {
-  Animated,
-  Text,
-  StyleSheet,
-  View,
-  ScrollView,
-  FlatList,
-  Image,
-  ImageBackground,
-  Dimensions,
-  Platform,
-  TouchableOpacity,
-} from "react-native";
-import FontAwesome from "react-native-vector-icons/FontAwesome";
-import Octicons from "react-native-vector-icons/Octicons";
+import React, { useState, useEffect } from "react";
+import { ScrollView, View } from "react-native";
 
+import styles from "../styles/List.styles";
 import * as theme from "../theme";
+import { Header } from "../components/Header.component";
 import { AudioPlayer } from "../components/AudioPlayer.component";
-import DelayInput from "react-native-debounce-input";
+import { DestinationsList } from "../components/DestinationsList.component";
+import { Stories } from "../components/Stories.component";
 
 import mocks from "./mocks";
+import { ListLoader } from "../components/ListLoader.component";
 
-const { width } = Dimensions.get("window");
+const stories = [
+  {
+    username: "Amit",
+    title: "Pune Dairies",
+    profile: "https://avatars0.githubusercontent.com/u/16208872?s=460&v=4",
+    stories: [
+      {
+        id: 1,
+        url:
+          "https://images.unsplash.com/photo-1532579853048-ec5f8f15f88d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60",
+        type: "image",
+        duration: 2,
+        isReadMore: true,
+      },
+    ],
+  },
+  {
+    username: "Trinadh",
+    profile: "https://avatars2.githubusercontent.com/u/45196619?s=460&v=4",
+    title: "My Gallery",
+    stories: [
+      {
+        id: 1,
+        url:
+          "https://file-examples-com.github.io/uploads/2017/04/file_example_MP4_480_1_5MG.mp4",
+        type: "video",
+        duration: 30,
+        isReadMore: true,
+      },
+      {
+        id: 2,
+        url:
+          "https://images.unsplash.com/photo-1476292026003-1df8db2694b8?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60",
+        type: "image",
+        duration: 2,
+        isSeen: false,
+        isReadMore: true,
+        isPaused: true,
+      },
+      {
+        id: 3,
+        url:
+          "https://images.unsplash.com/photo-1498982261566-1c28c9cf4c02?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60",
+        type: "image",
+        duration: 2,
+        isSeen: false,
+        isReadMore: true,
+        isPaused: true,
+      },
+    ],
+  },
+  {
+    username: "Steve Jobs",
+    profile:
+      "https://s3.amazonaws.com/media.eremedia.com/uploads/2012/05/15181015/stevejobs.jpg",
+    title: " Beach Moves",
+    stories: [
+      {
+        id: 1,
+        url:
+          "https://images.unsplash.com/photo-1515578706925-0dc1a7bfc8cb?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
+        type: "image",
+        duration: 2,
+        isReadMore: true,
+      },
+      {
+        id: 3,
+        url:
+          "https://images.unsplash.com/photo-1496287437689-3c24997cca99?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60",
+        type: "image",
+        duration: 2,
+        isSeen: false,
+        isReadMore: true,
+        isPaused: true,
+      },
+      {
+        id: 4,
+        url:
+          "https://images.unsplash.com/photo-1514870262631-55de0332faf6?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60",
+        type: "image",
+        duration: 2,
+        isSeen: false,
+        isReadMore: true,
+        isPaused: true,
+      },
+    ],
+  },
+  {
+    username: "Rahul",
+    profile:
+      "https://images.unsplash.com/profile-1531581190171-0cf831d86212?dpr=2&auto=format&fit=crop&w=150&h=150&q=60&crop=faces&bg=fff",
+    title: "Beauties @Beach",
+    stories: [
+      {
+        id: 4,
+        url:
+          "https://images.unsplash.com/photo-1512101176959-c557f3516787?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60",
+        type: "image",
+        duration: 2,
+        isReadMore: true,
+      },
+      {
+        id: 5,
+        url:
+          "https://images.unsplash.com/photo-1478397453044-17bb5f994100?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60",
+        type: "image",
+        duration: 2,
+        isSeen: false,
+        isReadMore: true,
+        isPaused: true,
+      },
+      {
+        id: 4,
+        url:
+          "https://images.unsplash.com/photo-1505118380757-91f5f5632de0?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=581&q=80",
+        type: "image",
+        duration: 2,
+        isSeen: false,
+        isReadMore: true,
+        isPaused: true,
+      },
+    ],
+  },
+];
 
 const List = ({ navigation }) => {
-  const scrollX = new Animated.Value(0);
-  const inputRef = createRef();
-
   const [query, setQuery] = useState("");
   const [filteredDestinations, setFilteredDestinations] = useState(mocks);
+  const [isLoaded, setLoaded] = useState(false);
 
   const [selectedItem, setSelectedItem] = useState(null);
+
+  useEffect(() => {
+    setTimeout(() => {
+      setLoaded(true);
+    }, 2000);
+  });
 
   useEffect(() => {
     const lowerCaseQuery = query.toLowerCase();
@@ -41,20 +158,6 @@ const List = ({ navigation }) => {
     setFilteredDestinations(newDestinations);
   }, [query]);
 
-  const HeaderComponent = () => (
-    <View style={[styles.flex, styles.row, styles.header]}>
-      <DelayInput
-        value={query}
-        placeholder={"Search..."}
-        minLength={1}
-        inputRef={inputRef}
-        onChangeText={setQuery}
-        delayTimeout={500}
-        style={{ fontSize: theme.sizes.font }}
-      />
-    </View>
-  );
-
   toggleSound = (item) => {
     if (selectedItem === item) {
       setSelectedItem(null);
@@ -63,221 +166,30 @@ const List = ({ navigation }) => {
     }
   };
 
-  renderDestinations = () => {
-    return (
-      <View style={[styles.flex, styles.column, styles.recommended]}>
-        <View style={[styles.row, styles.recommendedHeader]}>
-          <Text style={{ fontSize: theme.sizes.font * 1.4 }}>
-            Our ambient sounds{" "}
-          </Text>
-        </View>
-        <View style={[styles.column, styles.recommendedList]}>
-          <FlatList
-            numColumns={2}
-            columnWrapperStyle={{
-              marginTop: 10,
-              marginHorizontal: theme.sizes.margin * 0.5,
-            }}
-            pagingEnabled
-            scrollEnabled
-            showsHorizontalScrollIndicator={false}
-            scrollEventThrottle={16}
-            snapToAlignment="center"
-            style={[styles.shadow, { overflow: "visible" }]}
-            data={filteredDestinations}
-            keyExtractor={(item, index) => `${item.id}`}
-            renderItem={({ item, index }) =>
-              this.renderDestination(item, index)
-            }
-          />
-        </View>
-      </View>
-    );
-  };
-
-  renderDestination = (item, index) => {
-    const isLastItem = index === filteredDestinations.length - 1;
-    return (
-      <TouchableOpacity
-        style={[
-          styles.flex,
-          styles.column,
-          styles.recommendation,
-          styles.shadow,
-          isLastItem ? { marginRight: theme.sizes.margin / 2 } : null,
-        ]}
-        onPress={() => this.toggleSound(item)}
-      >
-        <View style={[styles.flex, styles.recommendationHeader]}>
-          <Image
-            style={[
-              styles.recommendationImage,
-              selectedItem === item ? { opacity: 0.2 } : { opacity: 1 },
-            ]}
-            source={{ uri: item.preview }}
-          />
-        </View>
-        <View
-          style={[
-            styles.flex,
-            styles.column,
-            styles.shadow,
-            {
-              justifyContent: "space-evenly",
-              padding: theme.sizes.padding / 2,
-            },
-          ]}
-        >
-          <Text
-            style={{
-              fontSize: theme.sizes.font * 1.25,
-              fontWeight: "500",
-              paddingBottom: theme.sizes.padding / 4.5,
-            }}
-          >
-            {item.title}
-          </Text>
-          <Text style={{ color: theme.colors.caption }}>
-            {item.description}
-          </Text>
-          <View
-            style={[
-              styles.row,
-              {
-                alignItems: "center",
-                justifyContent: "space-between",
-                marginTop: theme.sizes.margin,
-              },
-            ]}
-          ></View>
-        </View>
-      </TouchableOpacity>
-    );
-  };
   return (
-    <React.Fragment>
-      <HeaderComponent />
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: theme.sizes.padding }}
-      >
-        {this.renderDestinations()}
-      </ScrollView>
-      <AudioPlayer item={selectedItem} />
-    </React.Fragment>
+    <>
+      <ListLoader visible={!isLoaded}/>
+      {isLoaded && (
+        <React.Fragment>
+          <Stories stories={stories} styles={styles} />
+          <Header styles={styles} query={query} setQuery={setQuery} />
+
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: theme.sizes.padding }}
+          >
+            <DestinationsList
+              styles={styles}
+              onPress={toggleSound}
+              destinations={filteredDestinations}
+              selectedItem={selectedItem}
+            />
+          </ScrollView>
+          <AudioPlayer item={selectedItem} />
+        </React.Fragment>
+      )}
+    </>
   );
 };
-
-const styles = StyleSheet.create({
-  flex: {
-    flex: 0,
-  },
-  column: {
-    flexDirection: "column",
-  },
-  row: {
-    flexDirection: "row",
-  },
-  header: {
-    backgroundColor: theme.colors.white,
-    paddingHorizontal: theme.sizes.padding,
-    paddingTop: theme.sizes.padding * 1.33,
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  destinations: {
-    flex: 1,
-    justifyContent: "space-between",
-    paddingBottom: 30,
-  },
-  destination: {
-    width: width - theme.sizes.padding * 2,
-    height: width * 0.6,
-    marginHorizontal: theme.sizes.margin,
-    paddingHorizontal: theme.sizes.padding,
-    paddingVertical: theme.sizes.padding * 0.66,
-    borderRadius: theme.sizes.radius,
-  },
-  destinationInfo: {
-    position: "absolute",
-    borderRadius: theme.sizes.radius,
-    paddingHorizontal: theme.sizes.padding,
-    paddingVertical: theme.sizes.padding / 2,
-    bottom: 20,
-    left: (width - theme.sizes.padding * 4) / (Platform.OS === "ios" ? 3.2 : 3),
-    backgroundColor: theme.colors.white,
-    width: width - theme.sizes.padding * 4,
-  },
-  recommendedHeader: {
-    justifyContent: "space-between",
-    alignItems: "flex-end",
-    paddingHorizontal: theme.sizes.padding,
-  },
-  recommendation: {
-    width: (width - theme.sizes.padding * 2) / 2,
-    marginHorizontal: 8,
-    backgroundColor: theme.colors.white,
-    overflow: "hidden",
-    borderRadius: theme.sizes.radius,
-    marginVertical: theme.sizes.margin * 0.5,
-  },
-  recommendationHeader: {
-    overflow: "hidden",
-    borderTopRightRadius: theme.sizes.radius,
-    borderTopLeftRadius: theme.sizes.radius,
-  },
-  recommendationOptions: {
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: theme.sizes.padding / 2,
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-  },
-  recommendationTemp: {
-    fontSize: theme.sizes.font * 1.25,
-    color: theme.colors.white,
-  },
-  recommendationImage: {
-    width: (width - theme.sizes.padding * 2) / 2,
-    height: (width - theme.sizes.padding * 2) / 2,
-  },
-  avatar: {
-    width: theme.sizes.padding,
-    height: theme.sizes.padding,
-    borderRadius: theme.sizes.padding / 2,
-  },
-  rating: {
-    fontSize: theme.sizes.font * 2,
-    color: theme.colors.white,
-    fontWeight: "bold",
-  },
-  shadow: {
-    shadowColor: theme.colors.black,
-    shadowOffset: {
-      width: 0,
-      height: 6,
-    },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 5,
-  },
-  dots: {
-    width: 10,
-    height: 10,
-    borderWidth: 2.5,
-    borderRadius: 5,
-    marginHorizontal: 6,
-    backgroundColor: theme.colors.gray,
-    borderColor: "transparent",
-  },
-  activeDot: {
-    width: 12.5,
-    height: 12.5,
-    borderRadius: 6.25,
-    borderColor: theme.colors.active,
-  },
-});
 
 export default List;
