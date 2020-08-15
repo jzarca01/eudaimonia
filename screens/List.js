@@ -37,7 +37,6 @@ const stories = [
         url:
           "https://file-examples-com.github.io/uploads/2017/04/file_example_MP4_480_1_5MG.mp4",
         type: "video",
-        duration: 30,
         isReadMore: true,
       },
       {
@@ -179,13 +178,12 @@ const List = ({ navigation }) => {
       <ListLoader visible={!isLoaded}/>
       {isLoaded && (
         <React.Fragment>
-          <Stories stories={stories} styles={styles} />
-          <Header styles={styles} query={query} setQuery={setQuery} />
-
           <ScrollView
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: theme.sizes.padding }}
           >
+            <Stories stories={stories} styles={styles} />
+            <Header styles={styles} query={query} setQuery={setQuery} />
             <DestinationsList
               styles={styles}
               onPress={toggleSound}
