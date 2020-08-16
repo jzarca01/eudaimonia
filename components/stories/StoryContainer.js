@@ -23,7 +23,7 @@ const GESTURE_CONFIG = {
 
 export default (props) => {
   const { user } = props;
-  const { stories = [], readMoreUrl } = user || {};
+  const { stories = [] } = user || {};
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isWebviewOpen, setWebviewOpen] = useState(false);
   const [isPause, setIsPause] = useState(false);
@@ -110,6 +110,8 @@ export default (props) => {
     }
   };
 
+  let currentStory = stories[currentIndex];
+
   return (
     <GestureRecognizer
       onSwipeDown={onSwipeDown}
@@ -149,13 +151,13 @@ export default (props) => {
             isNewStory={props.isNewStory}
             stories={stories}
             currentIndex={currentIndex}
-            currentStory={stories[currentIndex]}
+            currentStory={currentStory}
             length={stories.map((_, i) => i)}
             progress={{ id: currentIndex }}
           />
         </View>
 
-        {readMoreUrl && (
+        {currentStory.readMoreUrl !== '' && (
           <React.Fragment>
             <Readmore onReadMore={onReadMoreOpen} />
             <Modal
@@ -167,7 +169,7 @@ export default (props) => {
               transparent={false}
             >
               <View style={styles.bar} />
-              <WebView source={{ uri: readMoreUrl }} />
+              <WebView source={{ uri: currentStory.readMoreUrl }} />
             </Modal>
           </React.Fragment>
         )}
